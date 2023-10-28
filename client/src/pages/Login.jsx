@@ -30,12 +30,7 @@ export const Login = () => {
   ) : (
     <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-        <img
-          className="mx-auto h-10 w-auto"
-          src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
-          alt="Your Company"
-        />
-        <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
+        <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-white">
           Sign in to your account
         </h2>
       </div>
@@ -45,7 +40,7 @@ export const Login = () => {
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium leading-6 text-gray-900"
+              className="block text-sm font-medium leading-6 text-white"
             >
               Username / Email address
             </label>
@@ -60,7 +55,7 @@ export const Login = () => {
                 }
                 autoComplete="email"
                 required
-                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-custom-berkeley-blue sm:text-sm sm:leading-6"
+                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-1 focus:ring-white sm:text-sm sm:leading-6"
               />
             </div>
           </div>
@@ -69,7 +64,7 @@ export const Login = () => {
             <div className="flex items-center justify-between">
               <label
                 htmlFor="password"
-                className="block text-sm font-medium leading-6 text-gray-900"
+                className="block text-sm font-medium leading-6 text-white"
               >
                 Password
               </label>
@@ -85,7 +80,7 @@ export const Login = () => {
                 }
                 autoComplete="current-password"
                 required
-                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-custom-berkeley-blue sm:text-sm sm:leading-6"
+                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 focus:ring-1 focus:ring-white"
               />
             </div>
           </div>
@@ -94,20 +89,20 @@ export const Login = () => {
             <button
               type="submit"
               onClick={handleSubmit}
-              className="flex w-full justify-center customBtn bg-custom-berkeley-blue hover:bg-custom-cerulean"
+              className="flex w-full justify-center borderBtnWhite"
             >
               Sign in
             </button>
           </div>
-          {error && <h1>{error}</h1>}
-          {success && <h1>{success}</h1>}
+          {error && <span className="text-white block">{error}</span>}
+          {success && <span className="text-white block">{success}</span>}
         </form>
 
-        <p className="mt-10 text-center text-sm text-gray-500">
+        <p className="mt-10 text-center text-sm text-gray-300">
           Not a member?{" "}
           <a
             href="#"
-            className="font-semibold leading-6 text-custom-berkeley-blue hover:text-indigo-500"
+            className="font-semibold leading-6 text-white hover:text-slate-300"
           >
             Signup
           </a>

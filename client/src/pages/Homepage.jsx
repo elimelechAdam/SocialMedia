@@ -1,5 +1,8 @@
-import React from "react";
-import { Feeds } from "../components/Feeds";
+import React, { Suspense } from "react";
+
+const Feeds = React.lazy(() =>
+  import("../components/Feeds").then((module) => ({ default: module.Feeds }))
+);
 import { Friends } from "../components/Friends";
 import { Groups } from "../components/Groups";
 
@@ -10,7 +13,9 @@ export const Homepage = () => {
         <Groups />
       </div>
       <div className="p-2 w-2/4">
-        <Feeds />
+        <Suspense fallback={<div>Loading...</div>}>
+          <Feeds />
+        </Suspense>
       </div>
       <div className="p-2 w-1/4">
         <Friends />

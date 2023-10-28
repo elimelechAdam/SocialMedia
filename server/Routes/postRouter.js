@@ -30,30 +30,55 @@ router.post(
     }
   }
 );
-// GET: List all posts
-// router.get("/", async (req, res) => {
+
+// GET: List posts of users that the current user follows - V1
+// router.get("/", authenticateJWT, async (req, res) => {
 //   try {
-//     const posts = await postBLL.getAllPosts();
+//     // Get the current user's 'following' array
+//     const currentUser = await User.findById(req.user._id);
+//     const followingUsers = currentUser.following;
+//     followingUsers.push(req.user._id);
+//     console.log(currentUser);
+//     // Fetch posts authored by users in the 'following' array
+//     const posts = await Post.find({ author: { $in: followingUsers } }).populate(
+//       "author",
+//       "fullname"
+//     );
 //     res.json(posts);
 //   } catch (error) {
 //     res.status(500).json({ message: error.message });
 //   }
 // });
 
-// GET: List posts of users that the current user follows
+// GET: List posts of users that the current user follows and Load more
 router.get("/", authenticateJWT, async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1; // Getting page number from query params
+    const limit = parseInt(req.query.limit) || 2; // Getting limit (number of posts per page) from query params
+    const skip = (page - 1) * limit; // Calculating number of posts to skip
+
     // Get the current user's 'following' array
     const currentUser = await User.findById(req.user._id);
     const followingUsers = currentUser.following;
     followingUsers.push(req.user._id);
-    console.log(currentUser);
+
     // Fetch posts authored by users in the 'following' array
-    const posts = await Post.find({ author: { $in: followingUsers } }).populate(
-      "author",
-      "fullname"
-    );
-    res.json(posts);
+    const posts = await Post.find({ author: { $in: followingUsers } })
+      .sort("-createdAt") // Sort by newest first
+      .skip(skip)
+      .limit(limit)
+      .populate("author", "fullname");
+
+    const total = await Post.countDocuments({
+      author: { $in: followingUsers },
+    }); // Getting total number of posts
+
+    res.json({
+      data: posts,
+      total: total,
+      page: page,
+      limit: limit,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

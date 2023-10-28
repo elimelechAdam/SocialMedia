@@ -10,20 +10,28 @@ import { CgProfile } from "react-icons/cg";
 
 export const Feeds = () => {
   const [feeds, setFeeds] = useState([]);
-
-  const getData = async () => {
-    try {
-      const data = await fetchData("posts");
-      // console.log(data);
-      setFeeds(data);
-    } catch (error) {
-      console.log("Error in feeds: ", error);
-    }
-  };
-
+  const [page, setPage] = useState(1);
   useEffect(() => {
+    const getData = async () => {
+      try {
+        const response = await fetchData(`posts?page=${page}&limit=2`);
+        console.log(response.data);
+        setFeeds((prevFeeds) => {
+          // Filter out any new posts that already exist in the state
+          const newFeeds = response.data.filter(
+            (newPost) =>
+              !prevFeeds.some(
+                (existingPost) => existingPost._id === newPost._id
+              )
+          );
+          return [...prevFeeds, ...newFeeds];
+        });
+      } catch (error) {
+        console.log("Error fetching feeds: ", error);
+      }
+    };
     getData();
-  }, []);
+  }, [page]);
 
   return (
     <div className="flex flex-col">
@@ -42,11 +50,10 @@ export const Feeds = () => {
           </button>
         </div>
       </div>
-      {console.log(feeds)}
       {feeds.map((feed, idx) => (
         <div
           className="p-4 shadow-sm bg-transparent mb-4 rounded-md border-0 ring-1 ring-inset ring-custom-onyx"
-          key={idx}
+          key={feed._id}
         >
           <div className="flex align-middle items-center gap-2">
             {" "}
@@ -79,6 +86,12 @@ export const Feeds = () => {
           </div>
         </div>
       ))}
+      <button
+        className="borderBtnWhite"
+        onClick={() => setPage((prevPage) => prevPage + 1)}
+      >
+        Load More
+      </button>
     </div>
   );
 };
