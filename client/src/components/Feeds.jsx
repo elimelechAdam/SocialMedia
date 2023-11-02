@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { addData, fetchData } from "../utils/apiUtils";
+import { addData, fetchData, updateData } from "../utils/apiUtils";
 import { useEffect } from "react";
 import {
   BiSolidLike,
@@ -49,6 +49,23 @@ export const Feeds = () => {
     }
   };
 
+  const addLike = async (postId) => {
+    const userId = localStorage.getItem("userId");
+    try {
+      const updatedPost = await updateData("posts", `${postId}/likes`, {
+        userId: userId,
+      });
+      setFeeds((prevFeeds) =>
+        prevFeeds.map((feed) =>
+          feed._id === postId ? { ...feed, likes: updatedPost.likes } : feed
+        )
+      );
+      console.log("added like");
+    } catch (error) {
+      console.log("Error adding like: ", error);
+    }
+  };
+
   return (
     <div className="flex flex-col">
       <div className="col-span-full">
@@ -72,7 +89,7 @@ export const Feeds = () => {
       </div>
       {feeds.map((feed, idx) => (
         <div
-          className="p-4 shadow-sm bg-transparent mb-4 rounded-md border-0 ring-1 ring-inset ring-custom-onyx"
+          className="select-none p-4 shadow-sm bg-transparent mb-4 rounded-md border-0 ring-1 ring-inset ring-custom-onyx"
           key={feed._id}
         >
           <div className="flex align-middle items-center gap-2">
@@ -90,19 +107,22 @@ export const Feeds = () => {
           <p className="break-words text-white font-light text-md leading-6 p-2 border-b ">
             {feed.content}
           </p>
-          <div className="text-2xl mt-2 p-2 text-white flex gap-4 flex-row-reverse">
-            <BiSolidDislike
-              className="hover:text-custom-black cursor-pointer
-            hover:transition delay-50 duration-300 ease-in-out"
-            />
+          <div className="text-2xl mt-2 p-2 text-white flex gap-4 flex-row-reverse items-center">
             <BiSolidLike
               className="hover:text-custom-black cursor-pointer
             hover:transition delay-50 duration-300 ease-in-out"
+              onClick={() => addLike(feed._id)}
             />
+            <p className="text-xs text-white select-none">
+              {feed.likes.length}
+            </p>
             <BiSolidMessageAltDetail
               className="hover:text-custom-black cursor-pointer
-            hover:transition delay-50 duration-300 ease-in-out"
+            hover:transition delay-50 duration-300 ease-in-out overflow-hidden"
             />
+            <span className="text-xs text-white select-none">
+              {feed.likes.length}
+            </span>
           </div>
         </div>
       ))}

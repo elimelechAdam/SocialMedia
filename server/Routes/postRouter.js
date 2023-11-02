@@ -115,36 +115,25 @@ router.delete("/:id", authenticateJWT, checkUserOwnership, async (req, res) => {
 });
 
 // PUT: Add a like
-router.put(
-  "/:id/like",
-  authenticateJWT,
-  checkUserOwnership,
-  async (req, res) => {
-    try {
-      const userId = req.user._id; // Get user ID from request, adjust depending on your auth system
-      const updatedPost = await postBLL.addLike(req.params.id, userId);
-      res.json(updatedPost);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
+router.put("/:id/likes", authenticateJWT, async (req, res) => {
+  try {
+    const userId = req.user._id; // Get user ID from request, adjust depending on your auth system
+    const updatedPost = await postBLL.addLike(req.params.id, userId);
+    res.json(updatedPost);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
-);
+});
 
-// DELETE: Remove a like
-router.delete(
-  "/:id/like",
-  authenticateJWT,
-  checkUserOwnership,
-  async (req, res) => {
-    try {
-      const userId = req.user._id; // Get user ID from request, adjust depending on your auth system
-      const updatedPost = await postBLL.removeLike(req.params.id, userId);
-      res.json(updatedPost);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
+// GET : View all likes
+router.get("/:id/likes", authenticateJWT, async (req, res) => {
+  try {
+    const users = await postBLL.viewLike(req.params.id);
+    res.json(users);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
-);
+});
 
 // POST: Add a comment
 router.post(

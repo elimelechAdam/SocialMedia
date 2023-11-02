@@ -30,11 +30,18 @@ async function deletePost(id) {
 
 async function addLike(postId, userId) {
   const post = await getPostById(postId); // This will throw an error if the post is not found
-  // Ensure the user hasn't already liked the post
+
   if (post.likes.includes(userId)) {
-    throw new Error("User already liked the post");
+    // If the user has already liked the post, remove their like
+    const index = post.likes.indexOf(userId);
+    if (index > -1) {
+      post.likes.splice(index, 1);
+    }
+  } else {
+    // Otherwise, add their like
+    post.likes.push(userId);
   }
-  post.likes.push(userId);
+
   await post.save();
   return post;
 }
@@ -49,6 +56,22 @@ async function removeLike(postId, userId) {
   }
   await post.save();
   return post;
+}
+//View all likes
+async function viewLike(postId) {
+  try {
+    // Fetch the post by its ID and populate the likes field
+    const post = await Post.findById(postId).populate("likes");
+
+    if (!post) {
+      throw new Error("Post not found");
+    }
+
+    // The populated likes field now contains full user objects instead of just IDs
+    return post.likes;
+  } catch (error) {
+    throw error; // Propagate the error to be handled by the calling function or route
+  }
 }
 
 async function addComment(postId, comment) {
@@ -78,5 +101,6 @@ module.exports = {
   addLike,
   removeLike,
   addComment,
+  viewLike,
   removeComment,
 };
