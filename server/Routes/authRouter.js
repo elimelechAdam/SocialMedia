@@ -31,7 +31,7 @@ router.post("/login", async (req, res) => {
     });
 
     // Send response
-    res.status(200).send({ message: "Login successful", token });
+    res.status(200).send({ message: "Login successful", token, _id: user._id });
   } catch (error) {
     res.status(500).send("Internal Server Error");
   }

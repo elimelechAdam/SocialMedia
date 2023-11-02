@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { fetchData } from "../utils/apiUtils";
+import { addData, fetchData } from "../utils/apiUtils";
 import { useEffect } from "react";
 import {
   BiSolidLike,
@@ -9,12 +9,17 @@ import {
 import { CgProfile } from "react-icons/cg";
 
 export const Feeds = () => {
+  const userId = localStorage.getItem("userId");
   const [feeds, setFeeds] = useState([]);
   const [page, setPage] = useState(1);
+  const [post, setPost] = useState({
+    content: "test",
+  });
+
   useEffect(() => {
     const getData = async () => {
       try {
-        const response = await fetchData(`posts?page=${page}&limit=2`);
+        const response = await fetchData(`posts?page=${page}`);
         console.log(response.data);
         setFeeds((prevFeeds) => {
           // Filter out any new posts that already exist in the state
@@ -33,6 +38,17 @@ export const Feeds = () => {
     getData();
   }, [page]);
 
+  const addPost = async (e) => {
+    e.preventDefault();
+    try {
+      const newPost = await addData(`posts/${userId}`, post);
+      setFeeds((prevFeeds) => [newPost, ...prevFeeds]);
+      setPost({ content: "" }); // Clear the textarea after posting
+    } catch (error) {
+      console.log("Error adding post: ", error);
+    }
+  };
+
   return (
     <div className="flex flex-col">
       <div className="col-span-full">
@@ -40,12 +56,16 @@ export const Feeds = () => {
           <textarea
             id="post"
             name="post"
+            onChange={(e) => setPost({ content: e.target.value })}
             placeholder="Post something"
             rows={3}
             className="block resize-none w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-1 focus:ring-inset focus:ring-custom-onyx sm:text-sm sm:leading-6"
             defaultValue={""}
           />
-          <button className="border border-white text-white rounded-full px-4 py-1 text-sm  mt-2 w-full hover:bg-white hover:text-black transition delay-150 duration-300 ease-in-out ">
+          <button
+            onClick={addPost}
+            className="border border-white text-white rounded-full px-4 py-1 text-sm  mt-2 w-full hover:bg-white hover:text-black transition delay-150 duration-300 ease-in-out "
+          >
             Post
           </button>
         </div>

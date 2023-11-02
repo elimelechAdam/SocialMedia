@@ -15,8 +15,9 @@ export const Login = () => {
         username: loginData.username,
         password: loginData.password,
       });
-      const { message, token } = data;
+      const { message, token, _id } = data;
       localStorage.setItem("userToken", token);
+      localStorage.setItem("userId", _id);
       setSuccess(message);
       setError("");
       navigate("/homepage");
