@@ -1,26 +1,33 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import { addData, fetchData, updateData } from "../utils/apiUtils";
-import { useEffect } from "react";
-import {
-  BiSolidLike,
-  BiSolidDislike,
-  BiSolidMessageAltDetail,
-} from "react-icons/bi";
+import { BiSolidLike, BiSolidMessageAltDetail } from "react-icons/bi";
 import { CgProfile } from "react-icons/cg";
+import { PostsModal } from "./PostsModal";
 
 export const Feeds = () => {
   const userId = localStorage.getItem("userId");
+  const [likedPosts, setLikedPosts] = useState([]);
   const [feeds, setFeeds] = useState([]);
   const [page, setPage] = useState(1);
   const [post, setPost] = useState({
     content: "test",
   });
+  console.log("likedPosts", likedPosts);
+  // Post message Modal
+  const [isOpen, setIsOpen] = useState(false);
+  function closeModal() {
+    setIsOpen(false);
+  }
+  function openModal() {
+    setIsOpen(true);
+  }
 
   useEffect(() => {
     const getData = async () => {
       try {
         const response = await fetchData(`posts?page=${page}`);
         console.log(response.data);
+
         setFeeds((prevFeeds) => {
           // Filter out any new posts that already exist in the state
           const newFeeds = response.data.filter(
@@ -29,6 +36,15 @@ export const Feeds = () => {
                 (existingPost) => existingPost._id === newPost._id
               )
           );
+
+          const likedPostIds = response.data
+            .filter((post) => post.likes.includes(userId))
+            .map((post) => post._id);
+          setLikedPosts((prevLikedPosts) => [
+            ...new Set([...prevLikedPosts, ...likedPostIds]),
+          ]);
+
+          console.log(response.data);
           return [...prevFeeds, ...newFeeds];
         });
       } catch (error) {
@@ -60,6 +76,8 @@ export const Feeds = () => {
           feed._id === postId ? { ...feed, likes: updatedPost.likes } : feed
         )
       );
+      setLikedPosts((prevLikedPosts) => [...prevLikedPosts, postId]);
+
       console.log("added like");
     } catch (error) {
       console.log("Error adding like: ", error);
@@ -67,71 +85,81 @@ export const Feeds = () => {
   };
 
   return (
-    <div className="flex flex-col">
-      <div className="col-span-full">
-        <div className="my-4">
-          <textarea
-            id="post"
-            name="post"
-            onChange={(e) => setPost({ content: e.target.value })}
-            placeholder="Post something"
-            rows={3}
-            className="block resize-none w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-1 focus:ring-inset focus:ring-custom-onyx sm:text-sm sm:leading-6"
-            defaultValue={""}
-          />
-          <button
-            onClick={addPost}
-            className="border border-white text-white rounded-full px-4 py-1 text-sm  mt-2 w-full hover:bg-white hover:text-black transition delay-150 duration-300 ease-in-out "
-          >
-            Post
-          </button>
+    <>
+      <div className="flex flex-col">
+        <div className="col-span-full">
+          <div className="my-4">
+            <textarea
+              id="post"
+              name="post"
+              onChange={(e) => setPost({ content: e.target.value })}
+              placeholder="Post something"
+              rows={3}
+              className="block resize-none w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-1 focus:ring-inset focus:ring-custom-onyx sm:text-sm sm:leading-6"
+              defaultValue={""}
+            />
+            <button
+              onClick={addPost}
+              className="border border-white text-white rounded-full px-4 py-1 text-sm  mt-2 w-full hover:bg-white hover:text-black transition delay-150 duration-300 ease-in-out "
+            >
+              Post
+            </button>
+          </div>
         </div>
-      </div>
-      {feeds.map((feed, idx) => (
-        <div
-          className="select-none p-4 shadow-sm bg-transparent mb-4 rounded-md border-0 ring-1 ring-inset ring-custom-onyx"
-          key={feed._id}
-        >
-          <div className="flex align-middle items-center gap-2">
-            {" "}
-            <CgProfile size={40} className="text-white " />
-            <div className="">
-              <h4 className="text-md cursor-pointer font-bold text-white">
-                {feed.author.fullname}
-              </h4>
-              <h4 className="text-xs cursor-pointer font-thin text-white">
-                {feed.createdAt}
-              </h4>
+        {feeds.map((feed, idx) => (
+          <div
+            className="select-none p-4 shadow-sm bg-transparent mb-4 rounded-md border-0 ring-1 ring-inset ring-custom-onyx"
+            key={feed._id}
+          >
+            <div className="flex align-middle items-center gap-2">
+              {" "}
+              <CgProfile size={40} className="text-white " />
+              <div className="">
+                <h4 className="text-md cursor-pointer font-bold text-white">
+                  {feed.author.fullname}
+                </h4>
+                <h4 className="text-xs cursor-pointer font-thin text-white">
+                  {feed.createdAt}
+                </h4>
+              </div>
+            </div>
+            <p className="break-words text-white font-light text-md leading-6 p-2 border-b ">
+              {feed.content}
+            </p>
+            <div className="text-2xl mt-2 p-2 text-white flex gap-4 flex-row-reverse items-center">
+              <BiSolidLike
+                className={`hover:text-custom-black cursor-pointer hover:transition delay-50 duration-300 ease-in-out overflow-hidden ${
+                  likedPosts.includes(feed._id)
+                    ? "text-custom-black"
+                    : "text-white"
+                }`}
+                onClick={() => addLike(feed._id)}
+              />
+              <p className="text-xs text-white select-none">
+                {feed.likes.length}
+              </p>
+              <BiSolidMessageAltDetail
+                onClick={openModal}
+                className="hover:text-custom-black cursor-pointer
+            hover:transition delay-50 duration-300 ease-in-out overflow-hidden"
+              />
+              <span
+                className="text-xs text-white select-none"
+                onClick={openModal}
+              >
+                {feed.comments.length}
+              </span>
             </div>
           </div>
-          <p className="break-words text-white font-light text-md leading-6 p-2 border-b ">
-            {feed.content}
-          </p>
-          <div className="text-2xl mt-2 p-2 text-white flex gap-4 flex-row-reverse items-center">
-            <BiSolidLike
-              className="hover:text-custom-black cursor-pointer
-            hover:transition delay-50 duration-300 ease-in-out"
-              onClick={() => addLike(feed._id)}
-            />
-            <p className="text-xs text-white select-none">
-              {feed.likes.length}
-            </p>
-            <BiSolidMessageAltDetail
-              className="hover:text-custom-black cursor-pointer
-            hover:transition delay-50 duration-300 ease-in-out overflow-hidden"
-            />
-            <span className="text-xs text-white select-none">
-              {feed.likes.length}
-            </span>
-          </div>
-        </div>
-      ))}
-      <button
-        className="borderBtnWhite"
-        onClick={() => setPage((prevPage) => prevPage + 1)}
-      >
-        Load More
-      </button>
-    </div>
+        ))}
+        <button
+          className="borderBtnWhite"
+          onClick={() => setPage((prevPage) => prevPage + 1)}
+        >
+          Load More
+        </button>
+      </div>
+      <PostsModal isOpen={isOpen} closeModal={closeModal} />
+    </>
   );
 };
