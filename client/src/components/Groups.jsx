@@ -3,7 +3,7 @@ import { PhotoIcon, UserCircleIcon } from "@heroicons/react/24/solid";
 
 export const Groups = () => {
   return (
-    <div className="flex flex-col">
+    <div className="hidden lg:flex lg:flex-col">
       <div className="p-4 shadow-lg bg-transparent border  max-w-3xl rounded-md">
         <div className="text-2xl border-b-2 p-2 mb-2 text-white flex items-end justify-between">
           <h4 className="text-lg font-thin">Groups</h4>

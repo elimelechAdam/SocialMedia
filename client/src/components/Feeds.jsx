@@ -4,15 +4,17 @@ import { BiSolidLike, BiSolidMessageAltDetail } from "react-icons/bi";
 import { CgProfile } from "react-icons/cg";
 import { PostsModal } from "./PostsModal";
 
-export const Feeds = () => {
+export const Feeds = ({
+  feeds,
+  setFeeds,
+  likedPosts,
+  setLikedPosts,
+  setPage,
+}) => {
   const userId = localStorage.getItem("userId");
-  const [likedPosts, setLikedPosts] = useState([]);
-  const [feeds, setFeeds] = useState([]);
-  const [page, setPage] = useState(1);
   const [post, setPost] = useState({
-    content: "test",
+    content: "",
   });
-  console.log("likedPosts", likedPosts);
   // Post message Modal
   const [isOpen, setIsOpen] = useState(false);
   function closeModal() {
@@ -21,38 +23,6 @@ export const Feeds = () => {
   function openModal() {
     setIsOpen(true);
   }
-
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const response = await fetchData(`posts?page=${page}`);
-        console.log(response.data);
-
-        setFeeds((prevFeeds) => {
-          // Filter out any new posts that already exist in the state
-          const newFeeds = response.data.filter(
-            (newPost) =>
-              !prevFeeds.some(
-                (existingPost) => existingPost._id === newPost._id
-              )
-          );
-
-          const likedPostIds = response.data
-            .filter((post) => post.likes.includes(userId))
-            .map((post) => post._id);
-          setLikedPosts((prevLikedPosts) => [
-            ...new Set([...prevLikedPosts, ...likedPostIds]),
-          ]);
-
-          console.log(response.data);
-          return [...prevFeeds, ...newFeeds];
-        });
-      } catch (error) {
-        console.log("Error fetching feeds: ", error);
-      }
-    };
-    getData();
-  }, [page]);
 
   const addPost = async (e) => {
     e.preventDefault();
@@ -66,7 +36,6 @@ export const Feeds = () => {
   };
 
   const addLike = async (postId) => {
-    const userId = localStorage.getItem("userId");
     try {
       const updatedPost = await updateData("posts", `${postId}/likes`, {
         userId: userId,
@@ -86,8 +55,8 @@ export const Feeds = () => {
 
   return (
     <>
-      <div className="flex flex-col">
-        <div className="col-span-full">
+      <div className="flex flex-col ">
+        <div className="col-span-full border px-5 mb-5 rounded-md ">
           <div className="my-4">
             <textarea
               id="post"
@@ -98,9 +67,10 @@ export const Feeds = () => {
               className="block resize-none w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-1 focus:ring-inset focus:ring-custom-onyx sm:text-sm sm:leading-6"
               defaultValue={""}
             />
+
             <button
               onClick={addPost}
-              className="border border-white text-white rounded-full px-4 py-1 text-sm  mt-2 w-full hover:bg-white hover:text-black transition delay-150 duration-300 ease-in-out "
+              className="border border-white text-white rounded-full px-4 py-1 text-sm mt-2  hover:bg-white hover:text-black transition delay-150 duration-300 ease-in-out "
             >
               Post
             </button>

@@ -3,7 +3,7 @@ import { PhotoIcon, UserCircleIcon } from "@heroicons/react/24/solid";
 
 export const Friends = () => {
   return (
-    <div className="flex flex-col">
+    <div className="hidden lg:flex lg:flex-col">
       <div className="p-4 shadow-lg bg-transparent border  max-w-3xl rounded-md">
         <div className="text-2xl border-b-2 p-2 mb-2 text-white flex items-end justify-between">
           <h4 className="text-lg font-thin">Follow</h4>
@@ -15,7 +15,7 @@ export const Friends = () => {
             <UserCircleIcon width={40} />
           </div>
           <div>
-            <button className="borderBtn">Add friend</button>
+            <button className="borderBtn">Follow</button>
           </div>
         </div>
       </div>
