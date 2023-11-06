@@ -1,4 +1,6 @@
 const Post = require("../models/PostModel");
+const Comment = require("../models/CommentModel");
+const mongoose = require("mongoose");
 
 async function getAllPosts() {
   return await Post.find().populate("author", "fullname");
@@ -74,11 +76,24 @@ async function viewLike(postId) {
   }
 }
 
-async function addComment(postId, comment) {
-  const post = await getPostById(postId); // This will throw an error if the post is not found
-  post.comments.push(comment);
+async function addComment(postId, authorId, commentContent) {
+  if (
+    !mongoose.Types.ObjectId.isValid(postId) ||
+    !mongoose.Types.ObjectId.isValid(authorId)
+  ) {
+    throw new Error("Invalid postId or authorId");
+  }
+  const comment = new Comment({
+    post: postId,
+    author: authorId,
+    content: commentContent,
+  });
+  await comment.save();
+
+  const post = await getPostById(postId);
+  post.comments.push(comment._id);
   await post.save();
-  return post;
+  return comment; // Return the newly created comment
 }
 
 async function removeComment(postId, commentId) {

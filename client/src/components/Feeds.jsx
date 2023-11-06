@@ -15,12 +15,15 @@ export const Feeds = ({
   const [post, setPost] = useState({
     content: "",
   });
+  const [currentPostId, setCurrentPostId] = useState(null);
+
   // Post message Modal
   const [isOpen, setIsOpen] = useState(false);
   function closeModal() {
     setIsOpen(false);
   }
-  function openModal() {
+  function openModal(postId) {
+    setCurrentPostId(postId);
     setIsOpen(true);
   }
 
@@ -46,8 +49,7 @@ export const Feeds = ({
         )
       );
       setLikedPosts((prevLikedPosts) => [...prevLikedPosts, postId]);
-
-      console.log("added like");
+      console.log("added like - change after to UI");
     } catch (error) {
       console.log("Error adding like: ", error);
     }
@@ -76,7 +78,7 @@ export const Feeds = ({
             </button>
           </div>
         </div>
-        {feeds.map((feed, idx) => (
+        {feeds.map((feed) => (
           <div
             className="select-none p-4 shadow-sm bg-transparent mb-4 rounded-md border-0 ring-1 ring-inset ring-custom-onyx"
             key={feed._id}
@@ -98,6 +100,7 @@ export const Feeds = ({
             </p>
             <div className="text-2xl mt-2 p-2 text-white flex gap-4 flex-row-reverse items-center">
               <BiSolidLike
+                value={feed._id}
                 className={`hover:text-custom-black cursor-pointer hover:transition delay-50 duration-300 ease-in-out overflow-hidden ${
                   likedPosts.includes(feed._id)
                     ? "text-custom-black"
@@ -109,13 +112,17 @@ export const Feeds = ({
                 {feed.likes.length}
               </p>
               <BiSolidMessageAltDetail
-                onClick={openModal}
+                onClick={() => {
+                  openModal(feed._id);
+                }}
                 className="hover:text-custom-black cursor-pointer
             hover:transition delay-50 duration-300 ease-in-out overflow-hidden"
               />
               <span
                 className="text-xs text-white select-none"
-                onClick={openModal}
+                onClick={() => {
+                  openModal(feed._id);
+                }}
               >
                 {feed.comments.length}
               </span>
@@ -129,7 +136,13 @@ export const Feeds = ({
           Load More
         </button>
       </div>
-      <PostsModal isOpen={isOpen} closeModal={closeModal} />
+      {/* postId, userId, content */}
+      <PostsModal
+        isOpen={isOpen}
+        closeModal={closeModal}
+        userId={userId}
+        postId={currentPostId}
+      />
     </>
   );
 };

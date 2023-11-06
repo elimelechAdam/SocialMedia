@@ -54,7 +54,7 @@ router.post(
 router.get("/", authenticateJWT, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1; // Getting page number from query params
-    const limit = parseInt(req.query.limit) || 2; // Getting limit (number of posts per page) from query params
+    const limit = parseInt(req.query.limit) || 4; // Getting limit (number of posts per page) from query params
     const skip = (page - 1) * limit; // Calculating number of posts to skip
 
     // Get the current user's 'following' array
@@ -135,21 +135,39 @@ router.get("/:id/likes", authenticateJWT, async (req, res) => {
   }
 });
 
-// POST: Add a comment
-router.post(
-  "/:id/comment",
-  authenticateJWT,
-  checkUserOwnership,
-  async (req, res) => {
-    try {
-      const comment = req.body; // Assumes the request body contains the full comment object or ID
-      const updatedPost = await postBLL.addComment(req.params.id, comment);
-      res.json(updatedPost);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
+// GET: List of comments for a post
+router.get("/:postId/comments", authenticateJWT, async (req, res) => {
+  try {
+    const postId = req.params.postId;
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).send("Post not found");
     }
+    res.status(200).send(post.comments);
+  } catch (error) {
+    res.status(500).send(error);
   }
-);
+});
+
+// POST: Add a comment to a post
+router.post("/:postId/comment", authenticateJWT, async (req, res) => {
+  try {
+    // Assuming req.user.id contains the ID of the user from the JWT after successful authentication
+    const userId = req.user._id;
+    const { content } = req.body; // Assuming the comment content is sent in the request body
+    const postId = req.params.postId;
+    console.log("content ", content);
+    console.log("postId ", postId);
+    console.log("userId ", userId);
+
+    // Use the BLL function to add the comment
+    const comment = await postBLL.addComment(postId, userId, content);
+    console.log("comment ", comment);
+    res.status(201).json(comment);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
 
 // DELETE: Remove a comment
 router.delete(
