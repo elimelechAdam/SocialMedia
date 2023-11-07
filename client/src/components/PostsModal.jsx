@@ -11,57 +11,41 @@ export const PostsModal = ({ isOpen, closeModal, userId, postId }) => {
   });
   const [currentCommentId, setCurrentCommentId] = useState(null);
 
-  const addComment = async (e) => {
-    e.preventDefault();
-    try {
-      const newComment = await addData(`posts/${postId}/comment`, comment);
-      setComments((prevComments) => [newComment, ...prevComments]);
-      setComment({ content: "" }); // Clear the textarea after posting
-    } catch (error) {
-      console.log("Error adding comment: ", error);
-    }
-  };
+  // const addComment = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     const newComment = await addData(`posts/${postId}/comment`, comment);
+  //     setComments((prevComments) => [newComment, ...prevComments]);
+  //     setComment({ content: "" }); // Clear the textarea after posting
+  //   } catch (error) {
+  //     console.log("Error adding comment: ", error);
+  //   }
+  // };
 
   useEffect(() => {
     const getData = async () => {
-      console.log(postId);
       if (!postId) return;
-      try {
-        const response = await fetchData(`posts/${postId}/comments`);
-        console.log("response", response);
-        // Fetch user details for each _id
-        const userDetailsPromises = response.map((userId) =>
-          fetchData(`/users/${userId}`).catch((error) => {
-            console.error(
-              `Error fetching details for user ID ${userId}:`,
-              error
-            );
-            return null;
-          })
-        );
-        console.log(userDetailsPromises);
-        const userDetailsResponses = await Promise.all(userDetailsPromises);
-        const usersInfo = userDetailsResponses.map((res) => {
-          const { fullname, profilePicture, _id } = res;
-          return { fullname, profilePicture, _id };
-        });
 
-        console.log(usersInfo);
-        // setComments((prevComments) => {
-        //   // Filter out any new posts that already exist in the state
-        //   const newComments = response.data.filter(
-        //     (newComment) =>
-        //       !prevComments.some(
-        //         (existingComment) => existingComment._id === newComment._id
-        //       )
-        //   );
-        //   console.log(response.data);
-        //   return [...prevComments, ...newComments];
-        // });
+      try {
+        const data = await fetchData(`posts/${postId}/comments`);
+        // const userDetails = await Promise.all(
+        //   data.map(async (comment) => {
+        //     const user = await fetchData(`users/${comment.author}`);
+        //     return user;
+        //   })
+        // );
+        setComments(data);
+        console.log("updated comments", data);
+
+        console.log(data);
+
+        // Update the state with the user details
+        // setComments(userDetails.filter((user) => user !== null)); // Filter out any nulls from errors
       } catch (error) {
-        console.log("Error fetching comments: ", error);
+        console.error("Error fetching user details:", error);
       }
     };
+
     getData();
   }, [postId]);
 
@@ -82,7 +66,7 @@ export const PostsModal = ({ isOpen, closeModal, userId, postId }) => {
           </Transition.Child>
 
           <div className="fixed inset-0 overflow-y-auto">
-            <div className="flex min-h-full items-center justify-center p-4 text-center">
+            <div className="flex min-h-full items-center justify-center p-4">
               <Transition.Child
                 as={Fragment}
                 enter="ease-out duration-300"
@@ -93,20 +77,32 @@ export const PostsModal = ({ isOpen, closeModal, userId, postId }) => {
                 leaveTo="opacity-0 scale-95"
               >
                 <form className="w-full max-w-lg bg-black p-6 border border-white">
-                  <div className="flex flex-wrap -mx-3 mb-2">
-                    <div className="w-full md:w-full px-3 mb-6 md:mb-0">
+                  {comments.map((comment, idx) => (
+                    <div
+                      key={comment._id}
+                      className="w-full md:w-full px-3 mb-6 md:mb-0"
+                    >
                       <div className="flex align-middle items-center gap-2">
                         <h4 className="text-md cursor-pointer font-bold text-white">
-                          fullname
+                          {comment.author.fullname}{" "}
+                          {/* You may want to display the author's name, not just the ID */}
                         </h4>
                         <h4 className="text-xs cursor-pointer font-thin text-white">
-                          date
+                          {new Date(comment.createdAt).toLocaleString()}{" "}
+                          {/* Format the date */}
                         </h4>
                       </div>
-                      <p className="break-words text-white font-light text-sm leading-6 p-2 border-b mb-2">
-                        content
+                      <p
+                        className={`break-words text-white font-light text-sm leading-6 p-2 mb-2  ${
+                          idx !== comments.length - 1 ? "border-b" : ""
+                        } `}
+                      >
+                        {comment.content}
                       </p>
                     </div>
+                  ))}
+
+                  <div className="flex flex-wrap -mx-3 mb-2 mt-5">
                     <input
                       type="text"
                       placeholder="Post something..."

@@ -27,6 +27,7 @@ const PostSchema = new mongoose.Schema(
         ref: "Comment",
       },
     ],
+
     // TODO: Consider the implications of post deletion on likes, comments, and related data.
     // TODO: Consider implementing privacy settings for posts.
   },

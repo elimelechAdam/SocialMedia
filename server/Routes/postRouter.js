@@ -1,5 +1,6 @@
 const express = require("express");
 const Post = require("../models/PostModel");
+const Comment = require("../models/CommentModel");
 const User = require("../models/UserModel");
 const postBLL = require("../BLL/PostBLL");
 const { checkUserOwnership, authenticateJWT } = require("../middleware/token");
@@ -136,15 +137,29 @@ router.get("/:id/likes", authenticateJWT, async (req, res) => {
 });
 
 // GET: List of comments for a post
+
+// need to move to commentRouter
 router.get("/:postId/comments", authenticateJWT, async (req, res) => {
   try {
     const postId = req.params.postId;
-    const post = await Post.findById(postId);
-    if (!post) {
+    // Ensure you are populating the correct path
+    const comments = await Comment.find({ post: postId }).populate(
+      "author",
+      "fullname"
+    );
+
+    console.log(comments);
+    if (!comments) {
       return res.status(404).send("Post not found");
     }
-    res.status(200).send(post.comments);
+
+    if (comments.length === 0) {
+      console.log("No comments found for this post.");
+    }
+
+    res.status(200).send(comments);
   } catch (error) {
+    console.error("Error populating comments:", error);
     res.status(500).send(error);
   }
 });

@@ -111,6 +111,7 @@ export const Feeds = ({
               <p className="text-xs text-white select-none">
                 {feed.likes.length}
               </p>
+
               <BiSolidMessageAltDetail
                 onClick={() => {
                   openModal(feed._id);
