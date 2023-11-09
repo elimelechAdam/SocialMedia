@@ -1,7 +1,7 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useState } from "react";
 import { AiOutlineUser } from "react-icons/ai";
-import { fetchData } from "../utils/apiUtils";
+import { addData, fetchData } from "../utils/apiUtils";
 // postId, userId, content
 export const PostsModal = ({ isOpen, closeModal, userId, postId }) => {
   /* get all data from posts/65352e7021b390dfcdeabac0/comments using fetch*/
@@ -28,17 +28,9 @@ export const PostsModal = ({ isOpen, closeModal, userId, postId }) => {
 
       try {
         const data = await fetchData(`posts/${postId}/comments`);
-        // const userDetails = await Promise.all(
-        //   data.map(async (comment) => {
-        //     const user = await fetchData(`users/${comment.author}`);
-        //     return user;
-        //   })
-        // );
         setComments(data);
         console.log("updated comments", data);
-
         console.log(data);
-
         // Update the state with the user details
         // setComments(userDetails.filter((user) => user !== null)); // Filter out any nulls from errors
       } catch (error) {
@@ -48,6 +40,21 @@ export const PostsModal = ({ isOpen, closeModal, userId, postId }) => {
 
     getData();
   }, [postId]);
+
+  const addComment = async (e) => {
+    e.preventDefault();
+    try {
+      // console.log("test");
+      console.log(comment);
+      const newComment = await addData(`posts/${postId}/comment`, comment);
+      console.log(newComment);
+      setComments((prevComments) => [newComment, ...prevComments]);
+      setComment({ content: "" }); // Clear the textarea after posting
+      closeModal();
+    } catch (error) {
+      console.log("Error adding comment: ", error);
+    }
+  };
 
   return (
     <>
@@ -104,6 +111,10 @@ export const PostsModal = ({ isOpen, closeModal, userId, postId }) => {
 
                   <div className="flex flex-wrap -mx-3 mb-2 mt-5">
                     <input
+                      value={comment.content}
+                      onChange={(e) =>
+                        setComment({ ...comment, content: e.target.value })
+                      }
                       type="text"
                       placeholder="Post something..."
                       className="border border-gray-200 bg-transparent rounded-sm p-2 w-full text-white
@@ -112,13 +123,7 @@ export const PostsModal = ({ isOpen, closeModal, userId, postId }) => {
                     />
                   </div>
                   <div className="flex justify-center gap-7 p-3">
-                    <button
-                      className="borderBtnWhite"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        closeModal();
-                      }}
-                    >
+                    <button className="borderBtnWhite" onClick={addComment}>
                       Post
                     </button>
                     <button
