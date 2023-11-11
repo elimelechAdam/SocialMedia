@@ -2,8 +2,11 @@ import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useState } from "react";
 import { AiOutlineUser } from "react-icons/ai";
 import { addData, fetchData } from "../utils/apiUtils";
+import { useUser } from "../context/UserProvider";
+import { CgProfile } from "react-icons/cg";
 // postId, userId, content
 export const PostsModal = ({ isOpen, closeModal, userId, postId }) => {
+  const { token } = useUser();
   /* get all data from posts/65352e7021b390dfcdeabac0/comments using fetch*/
   const [comments, setComments] = useState([]);
   const [comment, setComment] = useState({
@@ -27,7 +30,7 @@ export const PostsModal = ({ isOpen, closeModal, userId, postId }) => {
       if (!postId) return;
 
       try {
-        const data = await fetchData(`posts/${postId}/comments`);
+        const data = await fetchData(`posts/${postId}/comments`, token);
         setComments(data);
         console.log("updated comments", data);
         console.log(data);
@@ -46,11 +49,14 @@ export const PostsModal = ({ isOpen, closeModal, userId, postId }) => {
     try {
       // console.log("test");
       console.log(comment);
-      const newComment = await addData(`posts/${postId}/comment`, comment);
-      console.log(newComment);
-      setComments((prevComments) => [newComment, ...prevComments]);
+      const newComment = await addData(
+        `posts/${postId}/comment`,
+        comment,
+        token
+      );
+      setComments((prevComments) => [...prevComments, newComment]); // i switched the order of the comments
       setComment({ content: "" }); // Clear the textarea after posting
-      closeModal();
+      // closeModal();
     } catch (error) {
       console.log("Error adding comment: ", error);
     }
@@ -105,6 +111,7 @@ export const PostsModal = ({ isOpen, closeModal, userId, postId }) => {
                         } `}
                       >
                         {comment.content}
+                        {console.log(`comment`, comment)}
                       </p>
                     </div>
                   ))}

@@ -15,6 +15,8 @@ export const Navbar = () => {
   }
   const logout = () => {
     localStorage.clear();
+    localStorage.removeItem("userToken");
+    localStorage.removeItem("userId");
     navigate("/");
   };
   return (

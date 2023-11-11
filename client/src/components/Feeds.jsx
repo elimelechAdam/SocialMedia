@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { addData, fetchData, updateData } from "../utils/apiUtils";
 import { BiSolidLike, BiSolidMessageAltDetail } from "react-icons/bi";
 import { CgProfile } from "react-icons/cg";
 import { PostsModal } from "./PostsModal";
+import { useUser } from "../context/UserProvider";
 
 export const Feeds = ({
   feeds,
@@ -11,7 +12,9 @@ export const Feeds = ({
   setLikedPosts,
   setPage,
 }) => {
-  const userId = localStorage.getItem("userId");
+  // const userId = localStorage.getItem("userId");
+  const { userId, token, setUserId, setToken } = useUser();
+
   const [post, setPost] = useState({
     content: "",
   });
@@ -30,7 +33,7 @@ export const Feeds = ({
   const addPost = async (e) => {
     e.preventDefault();
     try {
-      const newPost = await addData(`posts/${userId}`, post);
+      const newPost = await addData(`posts/${userId}`, post, token);
       setFeeds((prevFeeds) => [newPost, ...prevFeeds]);
       setPost({ content: "" }); // Clear the textarea after posting
     } catch (error) {
@@ -40,15 +43,26 @@ export const Feeds = ({
 
   const addLike = async (postId) => {
     try {
-      const updatedPost = await updateData("posts", `${postId}/likes`, {
-        userId: userId,
-      });
+      const updatedPost = await updateData(
+        "posts",
+        `${postId}/likes`,
+        {
+          userId: userId,
+        },
+        token
+      );
       setFeeds((prevFeeds) =>
         prevFeeds.map((feed) =>
           feed._id === postId ? { ...feed, likes: updatedPost.likes } : feed
         )
       );
-      setLikedPosts((prevLikedPosts) => [...prevLikedPosts, postId]);
+      setLikedPosts((prevLikedPosts) => {
+        if (prevLikedPosts.includes(postId)) {
+          return prevLikedPosts.filter((id) => id !== postId);
+        } else {
+          return [...prevLikedPosts, postId];
+        }
+      });
       console.log("added like - change after to UI");
     } catch (error) {
       console.log("Error adding like: ", error);
