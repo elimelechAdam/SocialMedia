@@ -5,8 +5,8 @@ const Feeds = React.lazy(() =>
   import("../components/Feeds").then((module) => ({ default: module.Feeds }))
 );
 import { Friends } from "../components/Friends";
-import { Groups } from "../components/Groups";
 import { useUser } from "../context/UserProvider";
+import { Following } from "../components/Following";
 
 export const Homepage = () => {
   const { userId, token } = useUser();
@@ -55,9 +55,9 @@ export const Homepage = () => {
     const getData = async () => {
       try {
         const response = await fetchData("users", token);
-        console.log(`response`, response);
+        // console.log(`response`, response);
         // Update the state with the user details
-        setUsers(response.filter((user) => user._id !== userId)); // Filter out any nulls from errors
+        setUsers(response);
       } catch (error) {
         console.error("Error fetching user details:", error);
       }
@@ -69,7 +69,7 @@ export const Homepage = () => {
   return (
     <div className="flex justify-between p-2 ">
       <div className="lg:p-2 lg:w-1/4">
-        <Groups />
+        <Following users={users} userId={userId} />
       </div>
       <div className="p-2 w-2/4 sm:w-3/4">
         <Suspense fallback={<div>Loading feeds...</div>}>

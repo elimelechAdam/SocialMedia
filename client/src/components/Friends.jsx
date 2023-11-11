@@ -5,6 +5,7 @@ import { useUser } from "../context/UserProvider";
 
 export const Friends = ({ users, userId }) => {
   const { token } = useUser();
+  const currentUser = users.find((user) => user._id === userId);
   //   "/:userId/followers/:followerId",
   const followUser = async (userId, followerId) => {
     try {
@@ -23,29 +24,34 @@ export const Friends = ({ users, userId }) => {
         <div className="text-2xl border-b-2 p-2 mb-2 text-white flex items-end justify-between">
           <h4 className="text-lg font-thin">Follow</h4>
         </div>
-        {users.map((user) => (
-          <div
-            className="flex justify-between items-center p-2 bg-white rounded-lg mb-2"
-            key={user._id}
-          >
-            <div className="mb-2 xl:mb-0 flex items-center text-sm">
-              {/* This margin-bottom is for spacing between the icon and the button on mobile screens */}
-              <UserCircleIcon width={40} />
-              {user.fullname}
+        {users
+          .filter(
+            (user) =>
+              user._id !== userId && !currentUser.followers.includes(user._id)
+          )
+          .map((user) => (
+            <div
+              className="flex justify-between items-center p-2 bg-white rounded-lg mb-2"
+              key={user._id}
+            >
+              <div className="mb-2 xl:mb-0 flex items-center text-sm">
+                {/* This margin-bottom is for spacing between the icon and the button on mobile screens */}
+                <UserCircleIcon width={40} />
+                {user.fullname}
+              </div>
+              <div>
+                <button
+                  className="borderBtn"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    followUser(userId, user._id);
+                  }}
+                >
+                  Follow
+                </button>
+              </div>
             </div>
-            <div>
-              <button
-                className="borderBtn"
-                onClick={(e) => {
-                  e.preventDefault();
-                  followUser(userId, user._id);
-                }}
-              >
-                Follow
-              </button>
-            </div>
-          </div>
-        ))}
+          ))}
       </div>
     </div>
   );

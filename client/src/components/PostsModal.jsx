@@ -47,7 +47,6 @@ export const PostsModal = ({ isOpen, closeModal, userId, postId }) => {
   const addComment = async (e) => {
     e.preventDefault();
     try {
-      // console.log("test");
       console.log(comment);
       const newComment = await addData(
         `posts/${postId}/comment`,

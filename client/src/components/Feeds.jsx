@@ -63,7 +63,6 @@ export const Feeds = ({
           return [...prevLikedPosts, postId];
         }
       });
-      console.log("added like - change after to UI");
     } catch (error) {
       console.log("Error adding like: ", error);
     }
